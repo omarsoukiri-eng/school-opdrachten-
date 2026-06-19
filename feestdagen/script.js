@@ -1,62 +1,124 @@
-// 1. Feestdagen ophalen via API
-async function getNextHolidaysNederland() {
-  const year = new Date().getFullYear();
-  const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/NL`;
-  
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`API fout: ${response.status}`);
-    
-    const holidays = await response.json();
-    return filterUpcomingHolidays(holidays);
-  } catch (error) {
-    console.error('Kon feestdagen niet ophalen:', error);
-    return [];
-  }
+/**
+ * API-integratie voor Nederlandse feestdagen
+ * Bron: https://date.nager.at/Api
+ */
+
+class HolidayAPI {
+    constructor() {
+        this.baseUrl = 'https://date.nager.at/api/v3';
+        this.countryCode = 'NL';
+        this.cache = null;
+        this.cacheTime = null;
+        this.CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 uur
+    }
+
+    /**
+     * Haal alle feestdagen van dit jaar op
+     */
+    async getHolidaysThisYear() {
+        const year = new Date().getFullYear();
+        return this.getHolidaysByYear(year);
+    }
+
+    /**
+     * Haal feestdagen voor specifiek jaar op
+     */
+    async getHolidaysByYear(year) {
+        // Check cache
+        if (this.cache && this.cacheTime && Date.now() - this.cacheTime < this.CACHE_DURATION) {
+            return this.cache;
+        }
+
+        try {
+            const url = `${this.baseUrl}/PublicHolidays/${year}/${this.countryCode}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            }
+
+            const holidays = await response.json();
+            
+            // Cache het resultaat
+            this.cache = holidays;
+            this.cacheTime = Date.now();
+            
+            return holidays;
+        } catch (error) {
+            console.error('Fout bij ophalen feestdagen:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Geef volgende X schooldagen (exclusief feestdagen)
+     */
+    async getUpcomingSchoolDays(count = 3) {
+        const holidays = await this.getHolidaysThisYear();
+        const holidayDates = holidays.map(h => h.date);
+        
+        const schoolDays = [];
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        while (schoolDays.length < count) {
+            const dateString = currentDate.toISOString().split('T')[0];
+            const dayOfWeek = currentDate.getDay();
+
+            // Voeg toe als: niet weekend (0=zondag, 6=zaterdag) EN geen feestdag
+            if (dayOfWeek !== 0 && dayOfWeek !== 6 && !holidayDates.includes(dateString)) {
+                schoolDays.push({
+                    date: dateString,
+                    daysFromNow: this.getDaysFromNow(currentDate),
+                    dayName: this.getDutchDayName(dayOfWeek),
+                    isHoliday: false
+                });
+            }
+
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return schoolDays;
+    }
+
+    /**
+     * Geef volgende X feestdagen
+     */
+    async getUpcomingHolidays(count = 5) {
+        const holidays = await this.getHolidaysThisYear();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return holidays
+            .filter(h => new Date(h.date) >= today)
+            .slice(0, count)
+            .map(h => ({
+                ...h,
+                daysFromNow: this.getDaysFromNow(new Date(h.date)),
+                dayName: this.getDutchDayName(new Date(h.date).getDay()),
+                isHoliday: true
+            }));
+    }
+
+    /**
+     * Helper: bereken hoeveel dagen vanaf nu
+     */
+    getDaysFromNow(date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const diff = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+        return diff;
+    }
+
+    /**
+     * Helper: Nederlandse dagnamen
+     */
+    getDutchDayName(dayOfWeek) {
+        const days = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
+        return days[dayOfWeek];
+    }
 }
 
-// 2. Filter: alleen toekomstige feestdagen
-function filterUpcomingHolidays(holidays) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Geen tijd-deel
-  
-  return holidays
-    .filter(h => new Date(h.date) >= today)
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(0, 5); // Volgende 5 feestdagen
-}
-
-// 3. In het Dashboard tonen
-async function showHolidaysOnDashboard() {
-  const holidays = await getNextHolidaysNederland();
-  const container = document.getElementById('holidays-container');
-  
-  if (holidays.length === 0) {
-    container.innerHTML = '<p>Geen feestdagen geplanificeerd.</p>';
-    return;
-  }
-  
-  const html = holidays.map(h => {
-    const daysLeft = daysUntil(h.date);
-    return `
-      <div class="holiday-item">
-        <strong>${h.name}</strong>
-        <span>${new Date(h.date).toLocaleDateString('nl-NL')}</span>
-        <small>${daysLeft} dagen</small>
-      </div>
-    `;
-  }).join('');
-  
-  container.innerHTML = html;
-}
-
-// 4. Helper: bereken dagen tot feestdag
-function daysUntil(dateString) {
-  const today = new Date();
-  const target = new Date(dateString);
-  const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-  return diff === 0 ? 'Vandaag!' : `Over ${diff}`;
-}
-
-// Start
-showHolidaysOnDashboard();
+// Globale instantie
+const holidayAPI = new HolidayAPI();
