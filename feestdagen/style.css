@@ -1,0 +1,23 @@
+.holidays-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.holiday-item {
+  border-left: 4px solid #ff6b6b;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.holiday-item strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.holiday-item small {
+  display: block;
+  color: #666;
+  font-size: 0.85rem;
+}
