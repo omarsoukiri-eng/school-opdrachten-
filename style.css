@@ -1,0 +1,177 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+  text-align: center;
+  min-height: 100vh;
+  padding: 30px 20px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #e2b96f;
+  letter-spacing: 2px;
+}
+
+.scorebord {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.score-vak {
+  background: #16213e;
+  border: 2px solid #e2b96f;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-width: 90px;
+}
+
+.score-vak p {
+  font-size: 0.8rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.score-vak span {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #e2b96f;
+}
+
+#streak {
+  font-size: 1.1rem;
+  color: #ff9f43;
+  margin: 10px 0 5px;
+}
+
+#highscore {
+  font-size: 1.1rem;
+  color: #26de81;
+  margin-bottom: 20px;
+}
+
+.arena {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin: 20px 0;
+}
+
+.speler {
+  background: #16213e;
+  border: 2px solid #2a2a5a;
+  border-radius: 16px;
+  padding: 20px 30px;
+  min-width: 140px;
+}
+
+.speler p {
+  font-size: 0.85rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.speler div {
+  font-size: 3.5rem;
+}
+
+.vs {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #aaa;
+}
+
+#result {
+  font-size: 1.8rem;
+  font-weight: bold;
+  min-height: 2.5rem;
+  margin: 15px 0;
+  color: #fff;
+}
+
+.knoppen {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 2.5rem;
+  padding: 15px 25px;
+  cursor: pointer;
+  border: 2px solid #2a2a5a;
+  border-radius: 16px;
+  background: #16213e;
+  color: #eee;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  min-width: 100px;
+}
+
+button span {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+
+button:hover {
+  transform: scale(1.1) translateY(-4px);
+  border-color: #e2b96f;
+  background: #1f2f5a;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+@keyframes winAnimatie {
+  0%   { background-color: #1a1a2e; }
+  50%  { background-color: #1a3a2e; }
+  100% { background-color: #1a1a2e; }
+}
+
+@keyframes verliesAnimatie {
+  0%   { background-color: #1a1a2e; }
+  50%  { background-color: #3a1a1a; }
+  100% { background-color: #1a1a2e; }
+}
+
+@keyframes gelijkAnimatie {
+  0%   { background-color: #1a1a2e; }
+  50%  { background-color: #2e2a1a; }
+  100% { background-color: #1a1a2e; }
+}
+
+@keyframes schudden {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-10px); }
+  50%  { transform: translateX(10px); }
+  75%  { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+.animatie-win     { animation: winAnimatie 0.6s ease; }
+.animatie-verlies { animation: verliesAnimatie 0.6s ease; }
+.animatie-gelijk  { animation: gelijkAnimatie 0.6s ease; }
+.schudden         { animation: schudden 0.4s ease; }
