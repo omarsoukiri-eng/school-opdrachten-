@@ -1,0 +1,63 @@
+sps index v2 
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Steen Papier Schaar V2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>✊ Steen Papier Schaar ✌️</h1>
+
+  <div class="scorebord">
+    <div class="score-vak">
+      <p>Jij</p>
+      <span id="scoreJij">0</span>
+    </div>
+    <div class="score-vak">
+      <p>Gelijk</p>
+      <span id="scoreGelijk">0</span>
+    </div>
+    <div class="score-vak">
+      <p>Computer</p>
+      <span id="scoreComputer">0</span>
+    </div>
+    <div class="score-vak">
+      <p>Ronde</p>
+      <span id="ronde">1</span>
+    </div>
+  </div>
+
+  <p id="streak">🔥 Streak: 0 op rij</p>
+  <p id="highscore">🏆 Highscore: 0</p>
+
+  <div class="arena">
+    <div class="speler">
+      <p>Jij</p>
+      <div id="humanEmoji">♟️</div>
+      <div id="humanKeuzeEmoji"></div>
+      <p><strong>Keuze:</strong> <span id="human">—</span></p>
+    </div>
+    <div class="vs">VS</div>
+    <div class="speler">
+      <p>Computer</p>
+      <div id="computerEmoji">🖥️</div>
+      <div id="computerKeuzeEmoji"></div>
+      <p><strong>Keuze:</strong> <span id="computer">—</span></p>
+    </div>
+  </div>
+
+  <p id="result">Maak een keuze!</p>
+
+  <div class="knoppen">
+    <button id="steenBtn">✊<span>Steen</span></button>
+    <button id="papierBtn">✋<span>Papier</span></button>
+    <button id="schaarBtn">✌️<span>Schaar</span></button>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
