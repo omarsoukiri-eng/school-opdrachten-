@@ -1,124 +1,125 @@
 /**
- * API-integratie voor Nederlandse feestdagen
- * Bron: https://date.nager.at/Api
+ * Hoofdapp - initialisatie en event listeners
  */
 
-class HolidayAPI {
-    constructor() {
-        this.baseUrl = 'https://date.nager.at/api/v3';
-        this.countryCode = 'NL';
-        this.cache = null;
-        this.cacheTime = null;
-        this.CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 uur
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('App gestart');
 
-    /**
-     * Haal alle feestdagen van dit jaar op
-     */
-    async getHolidaysThisYear() {
-        const year = new Date().getFullYear();
-        return this.getHolidaysByYear(year);
-    }
+    // Initialisatie
+    displayToday();
+    setTodayAsDefault();
+    dashboard.loadSchoolDays();
+    dashboard.updateStats();
 
-    /**
-     * Haal feestdagen voor specifiek jaar op
-     */
-    async getHolidaysByYear(year) {
-        // Check cache
-        if (this.cache && this.cacheTime && Date.now() - this.cacheTime < this.CACHE_DURATION) {
-            return this.cache;
+    // NAVIGATIE
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            switchPage(page);
+        });
+    });
+
+    // FORMULIER
+    document.getElementById('register-form').addEventListener('submit', handleFormSubmit);
+
+    // OVERZICHT TONEN
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.nav-link[data-page="overzicht"]')) {
+            loadEntries();
         }
+    });
 
-        try {
-            const url = `${this.baseUrl}/PublicHolidays/${year}/${this.countryCode}`;
-            const response = await fetch(url);
+    // Refresh schooldagen elke uur
+    setInterval(() => dashboard.loadSchoolDays(), 60 * 60 * 1000);
+});
 
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status} ${response.statusText}`);
-            }
-
-            const holidays = await response.json();
-            
-            // Cache het resultaat
-            this.cache = holidays;
-            this.cacheTime = Date.now();
-            
-            return holidays;
-        } catch (error) {
-            console.error('Fout bij ophalen feestdagen:', error);
-            return [];
+/**
+ * Wissel tussen pagina's
+ */
+function switchPage(page) {
+    // Verberg alles
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // Toon gekozen pagina
+    document.getElementById(page).classList.add('active');
+    
+    // Update nav
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.page === page) {
+            link.classList.add('active');
         }
+    });
+}
+
+/**
+ * Handle formulier submit
+ */
+function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const date = document.getElementById('work-date').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const description = document.getElementById('description').value;
+    const messageDiv = document.getElementById('form-message');
+
+    // Validatie
+    if (!date || hours <= 0) {
+        showMessage('messageDiv', 'Vul alle verplichte velden in', 'error');
+        return;
     }
 
-    /**
-     * Geef volgende X schooldagen (exclusief feestdagen)
-     */
-    async getUpcomingSchoolDays(count = 3) {
-        const holidays = await this.getHolidaysThisYear();
-        const holidayDates = holidays.map(h => h.date);
+    // Opslaan
+    try {
+        saveEntry({ date, hours, description });
         
-        const schoolDays = [];
-        let currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-
-        while (schoolDays.length < count) {
-            const dateString = currentDate.toISOString().split('T')[0];
-            const dayOfWeek = currentDate.getDay();
-
-            // Voeg toe als: niet weekend (0=zondag, 6=zaterdag) EN geen feestdag
-            if (dayOfWeek !== 0 && dayOfWeek !== 6 && !holidayDates.includes(dateString)) {
-                schoolDays.push({
-                    date: dateString,
-                    daysFromNow: this.getDaysFromNow(currentDate),
-                    dayName: this.getDutchDayName(dayOfWeek),
-                    isHoliday: false
-                });
-            }
-
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        return schoolDays;
-    }
-
-    /**
-     * Geef volgende X feestdagen
-     */
-    async getUpcomingHolidays(count = 5) {
-        const holidays = await this.getHolidaysThisYear();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        return holidays
-            .filter(h => new Date(h.date) >= today)
-            .slice(0, count)
-            .map(h => ({
-                ...h,
-                daysFromNow: this.getDaysFromNow(new Date(h.date)),
-                dayName: this.getDutchDayName(new Date(h.date).getDay()),
-                isHoliday: true
-            }));
-    }
-
-    /**
-     * Helper: bereken hoeveel dagen vanaf nu
-     */
-    getDaysFromNow(date) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Reset formulier
+        document.getElementById('register-form').reset();
+        setTodayAsDefault();
         
-        const diff = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
-        return diff;
-    }
-
-    /**
-     * Helper: Nederlandse dagnamen
-     */
-    getDutchDayName(dayOfWeek) {
-        const days = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'];
-        return days[dayOfWeek];
+        showMessage('form-message', '✅ Uren succesvol opgeslagen!', 'success');
+        dashboard.updateStats();
+    } catch (error) {
+        showMessage('form-message', '❌ Fout bij opslaan', 'error');
     }
 }
 
-// Globale instantie
-const holidayAPI = new HolidayAPI();
+/**
+ * Laad overzicht van geregistreerde uren
+ */
+function loadEntries() {
+    const entries = getEntries();
+    const container = document.getElementById('entries-list');
+
+    if (entries.length === 0) {
+        container.innerHTML = '<p>Nog geen uren geregistreerd.</p>';
+        return;
+    }
+
+    const html = entries
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map(entry => `
+            <div class="entry-item">
+                <strong>${formatDateNL(entry.date)}</strong>
+                <span>${entry.hours} uur</span>
+                ${entry.description ? `<small>${entry.description}</small>` : ''}
+            </div>
+        `).join('');
+
+    container.innerHTML = html;
+}
+
+/**
+ * Toon bericht
+ */
+function showMessage(elementId, message, type) {
+    const element = document.getElementById(elementId);
+    element.textContent = message;
+    element.className = `message ${type}`;
+    
+    // Verwijder na 5 seconden
+    setTimeout(() => {
+        element.className = 'message';
+    }, 5000);
+}
