@@ -1,27 +1,42 @@
 async function getHolidays() {
-    const year = new Date().getFullYear();
-    const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/NL`;
-    
-    const response = await fetch(url);
-    const data = await response.json();
-    
-    const today = new Date();
-    const result = document.getElementById('result');
-    
-    data.forEach(holiday => {
-        const holidayDate = new Date(holiday.date);
-        const days = Math.ceil((holidayDate - today) / (1000 * 60 * 60 * 24));
+    try {
+        const response = await fetch('https://date.nager.at/api/v3/NextPublicHolidays/NL');
         
-        if (days > 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${holiday.name}</td>
-                <td>${holiday.date}</td>
-                <td>${days}</td>
-            `;
-            result.appendChild(row);
+        if (!response.ok) {
+            throw new Error('API fout');
         }
+        
+        const holidays = await response.json();
+        displayHolidays(holidays);
+    } catch (error) {
+        document.getElementById('holidays').innerHTML = `<div class="error">Fout bij laden: ${error.message}</div>`;
+    }
+}
+
+function displayHolidays(holidays) {
+    if (holidays.length === 0) {
+        document.getElementById('holidays').innerHTML = '<div class="empty">Geen feestdagen gevonden</div>';
+        return;
+    }
+
+    let html = '';
+    holidays.forEach(holiday => {
+        const date = new Date(holiday.date).toLocaleDateString('nl-NL', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        html += `
+            <div class="holiday">
+                <div class="holiday-date">${date}</div>
+                <div class="holiday-name">${holiday.localName}</div>
+            </div>
+        `;
     });
+
+    document.getElementById('holidays').innerHTML = html;
 }
 
 getHolidays();
