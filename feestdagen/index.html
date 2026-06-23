@@ -2,93 +2,18 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Feestdagen</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f0f0f0;
-        }
-        
-        h1 {
-            color: #333;
-        }
-        
-        table {
-            background: white;
-            border-collapse: collapse;
-            width: 100%;
-            max-width: 500px;
-        }
-        
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        
-        th {
-            background: #333;
-            color: white;
-        }
-        
-        tr:hover {
-            background: #f9f9f9;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Feestdagen</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Nederlandse Feestdagen</h1>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Feestdag</th>
-                <th>Datum</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Kerstmis (1e dag)</td>
-                <td>25 december 2026</td>
-            </tr>
-            <tr>
-                <td>Kerstmis (2e dag)</td>
-                <td>26 december 2026</td>
-            </tr>z
-            <tr>
-                <td>Nieuwjaarsdag</td>
-                <td>1 januari 2027</td>
-            </tr>
-            <tr>
-                <td>Pasen (1e dag)</td>
-                <td>11 april 2027</td>
-            </tr>
-            <tr>
-                <td>Pasen (2e dag)</td>
-                <td>12 april 2027</td>
-            </tr>
-            <tr>
-                <td>Koningsdag</td>
-                <td>27 april 2027</td>
-            </tr>
-            <tr>
-                <td>Bevrijdingsdag</td>
-                <td>5 mei 2027</td>
-            </tr>
-            <tr>
-                <td>Hemelvaartsdag</td>
-                <td>20 mei 2027</td>
-            </tr>
-            <tr>
-                <td>Pinksteren (1e dag)</td>
-                <td>30 mei 2027</td>
-            </tr>
-            <tr>
-                <td>Pinksteren (2e dag)</td>
-                <td>31 mei 2027</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="dashboard">
+        <div class="card">
+            <h2>Eerstvolgende Feestdagen (NL)</h2>
+            <div id="holidays" class="loading">Laden...</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
